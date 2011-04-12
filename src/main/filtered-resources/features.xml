@@ -18,10 +18,10 @@
 
 -->
 
-<features name="openengsb-connector-jira-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0"
+<features name="openengsb-connector-github-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.0.0 http://karaf.apache.org/xmlns/features/v1.0.0" >
-  <feature name="openengsb-connector-jira" version="${project.version}" >
+  <feature name="openengsb-connector-github" version="${project.version}" >
     <feature version="${openengsb.version.range}">openengsb-core</feature>
     <feature version="${openengsb.version.range}">openengsb-domain-issue</feature>
     <bundle>mvn:org.openengsb.wrapped/axis-all/${axis.wrapped.version}</bundle>

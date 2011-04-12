@@ -19,34 +19,16 @@ package org.openengsb.connector.github.internal;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.Mockito;
-import org.openengsb.connector.github.internal.GithubService;
-import org.openengsb.core.api.DomainMethodExecutionException;
 import org.openengsb.domain.issue.models.Issue;
+import org.openengsb.domain.issue.models.Issue.Status;
 import org.openengsb.domain.issue.models.IssueAttribute;
-
-import com.dolby.jira.net.soap.jira.JiraSoapService;
-import com.dolby.jira.net.soap.jira.RemoteComment;
-import com.dolby.jira.net.soap.jira.RemoteFieldValue;
-import com.dolby.jira.net.soap.jira.RemoteIssue;
-import com.dolby.jira.net.soap.jira.RemoteVersion;
 
 public class GithubServiceUT {
 
@@ -67,7 +49,7 @@ public class GithubServiceUT {
         Issue issue = createIssue("id1");
         int oldNumber = githubClient.getIssues().size();
         githubClient.createIssue(issue);
-        assertThat(githubClient.getIssues().size(),is(oldNumber));
+        assertThat(githubClient.getIssues().size(), is(oldNumber));
     }
 
     @Test
@@ -75,24 +57,78 @@ public class GithubServiceUT {
         Issue issue = createIssue("id1");
         int oldNumber = githubClient.getIssues().size();
         githubClient.createIssue(issue);
-        assertThat(githubClient.getIssues().size(),is(oldNumber+1));
+        assertThat(githubClient.getIssues().size(), is(oldNumber + 1));
     }
-    
+
     @Test
     public void testAddCommentWithIncorrectLogin_shouldFail() throws Exception {
         githubClient.setGithubAuthToken("wrongPWD");
         int oldNumber = githubClient.getComments(1).size();
         githubClient.addComment("1", "TestComment");
-        assertThat(githubClient.getComments(1).size(),is(oldNumber));
+        assertThat(githubClient.getComments(1).size(), is(oldNumber));
     }
-    
+
     @Test
     public void testAddComment() throws Exception {
         int oldNumber = githubClient.getComments(1).size();
         githubClient.addComment("1", "TestComment");
-        assertThat(githubClient.getComments(1).size(),is(oldNumber+1));
+        assertThat(githubClient.getComments(1).size(), is(oldNumber + 1));
         
     }
+
+    @Ignore
+    public void testUpdateIssue() throws Exception {
+        githubClient.setGithubAuthToken("hallo123!");
+
+        HashMap<IssueAttribute, String> changes = new HashMap<IssueAttribute, String>();
+        changes.put(Issue.Field.STATUS, "closed");
+        changes.put(Issue.Field.DESCRIPTION, "updated des");
+        changes.put(Issue.Field.SUMMARY, "updated summary");
+        
+        githubClient.updateIssue("2", "ChangeComment", changes);
+        
+        Issue tmp = githubClient.getIssue("2");
+        assertThat(tmp.getDescription(), is("updated des"));
+        assertThat(tmp.getSummary(), is("updated summary"));
+        assertThat(tmp.getStatus(), is(Status.CLOSED));
+        
+        changes.clear();
+        changes.put(Issue.Field.STATUS, "open");
+        changes.put(Issue.Field.DESCRIPTION, "1");
+        changes.put(Issue.Field.SUMMARY, "TestIssue02");
+        githubClient.updateIssue("2", "ChangeComment", changes);
+        
+    }
+    @Ignore
+    public void testUpdateIssueWithIncorrectLogin_shouldFail() throws Exception {
+        githubClient.setGithubAuthToken("wrongPWD");
+        
+        HashMap<IssueAttribute, String> changes = new HashMap<IssueAttribute, String>();
+        changes.put(Issue.Field.STATUS, "closed");
+        changes.put(Issue.Field.DESCRIPTION, "updated des");
+        changes.put(Issue.Field.SUMMARY, "updated summary");
+        
+        githubClient.updateIssue("2", "ChangeComment", changes);
+        
+        Issue tmp = githubClient.getIssue("2");
+        assertThat(tmp.getDescription(), is("1"));
+        assertThat(tmp.getSummary(), is("TestIssue02"));
+        assertThat(tmp.getStatus(), is(Status.NEW));
+    }
+    
+
+    
+    @Test
+    public void testGetIssue() throws Exception {
+        githubClient.getIssues();
+        Issue i = githubClient.getIssue("3");
+        assertThat(i.getDescription(), is("Comment_Of_TestIssue03"));
+        assertThat(i.getSummary(), is("TestIssue03"));
+        assertThat(i.getId(), is("3"));
+        assertThat(i.getStatus(), is(Status.NEW));
+        
+    }
+    
 /*
    @Test
     public void testUpdateIssue_shouldSuccess() throws Exception {

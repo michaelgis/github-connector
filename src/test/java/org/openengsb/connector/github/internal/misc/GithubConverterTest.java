@@ -21,11 +21,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
 import org.junit.Test;
-import org.openengsb.connector.github.internal.misc.FieldConverter;
-import org.openengsb.connector.github.internal.misc.JiraValueConverter;
-import org.openengsb.connector.github.internal.misc.PriorityConverter;
-import org.openengsb.connector.github.internal.misc.StatusConverter;
-import org.openengsb.connector.github.internal.misc.TypeConverter;
 import org.openengsb.domain.issue.models.Issue;
 
 /**

@@ -33,16 +33,14 @@ public class GithubServiceInstanceFactory implements ServiceInstanceFactory<Issu
     public ServiceDescriptor getDescriptor(Builder builder) {
         builder.name("service.name").description("service.description");
 
-        builder.attribute(
-            builder.newAttribute().id("github.user").name("github.user.name").description("github.user.description").build());
+        builder.attribute(builder.newAttribute().id("github.user").name("github.user.name")
+                .description("github.user.description").build());
         builder.attribute(builder.newAttribute().id("github.authToken").name("github.authToken.name")
-            .description("github.authToken.description").defaultValue("").asPassword().build());
-        builder.attribute(
-            builder.newAttribute().id("github.repository").name("github.repository.name").description("github.repository.description")
-                .defaultValue("").required().build());
-        builder.attribute(
-            builder.newAttribute().id("github.repositoryOwner").name("github.repositoryOwner.name").description("github.repositoryOwner.description")
-                .defaultValue("").required().build());
+                .description("github.authToken.description").defaultValue("").asPassword().build());
+        builder.attribute(builder.newAttribute().id("github.repository").name("github.repository.name")
+                .description("github.repository.description").defaultValue("").required().build());
+        builder.attribute(builder.newAttribute().id("github.repositoryOwner").name("github.repositoryOwner.name")
+                .description("github.repositoryOwner.description").defaultValue("").required().build());
 
         return builder.build();
     }
@@ -63,7 +61,8 @@ public class GithubServiceInstanceFactory implements ServiceInstanceFactory<Issu
 
     @Override
     public GithubService createServiceInstance(String id, Map<String, String> attributes) {
-        GithubService githubConnector = new GithubService(id, attributes.get("github.repository"), attributes.get("github.repositoryOwner"));
+        GithubService githubConnector = new GithubService(id, attributes.get("github.repository"),
+                attributes.get("github.repositoryOwner"));
         githubConnector.setGithubUser(attributes.get("github.user"));
         githubConnector.setGithubAuthToken(attributes.get("github.authToken"));
         updateServiceInstance(githubConnector, attributes);
