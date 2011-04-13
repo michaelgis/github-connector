@@ -19,6 +19,7 @@ package org.openengsb.connector.github.internal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 import org.apache.commons.logging.Log;
@@ -54,8 +55,7 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
 
     @Override
     public AliveState getAliveState() {
-        // TODO Auto-generated method stub
-        return null;
+        return state;
     }
 
     @Override
@@ -100,12 +100,8 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
 
     public Vector<GithubIssue> getIssues() {
         Issues service = new Issues(ghapi);
-        System.out.println();
-
         String temp = service.list(repositoryOwner, repository, "open").resp;
-        
         Vector<GithubIssue> listOfIssues = processIssueResponse(temp);
-        
         return listOfIssues;
 
     }
@@ -178,6 +174,7 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
 
     @Override
     public void closeRelease(String arg0) {
+        //Not available in ghapi
         throw new DomainMethodNotImplementedException("method not yet implemented");
     }
 
@@ -188,28 +185,30 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
         String tmp = service.open(repositoryOwner, repository, engsbIssue.getSummary(),
                 engsbIssue.getDescription()).resp;
         if (tmp != null) {
+            state = AliveState.ONLINE;
             return String.valueOf(processIssueResponse(tmp).get(0).getNumber());
         } else {
+            state = AliveState.OFFLINE;
             return null;
         }
     }
 
     @Override
     public ArrayList<String> generateReleaseReport(String arg0) {
+        //Not available in ghapi
         throw new DomainMethodNotImplementedException("method not yet implemented");
     }
 
     @Override
     public void moveIssuesFromReleaseToRelease(String arg0, String arg1) {
+        //Not available in ghapi
         throw new DomainMethodNotImplementedException("method not yet implemented");
     }
 
     @Override
     public void updateIssue(String id, String comment, HashMap<IssueAttribute, String> changes) {
-        throw new DomainMethodNotImplementedException("method not yet implemented");
-        /*ghapi.authenticate(githubUser, githubAuthToken);
+        ghapi.authenticate(githubUser, githubAuthToken);
         Issues service = new Issues(ghapi);
-        
         if (comment != null && !comment.equals("")) {
             addComment(id, comment);
         }
@@ -217,21 +216,20 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
         for (Map.Entry<IssueAttribute, String> entry : changes.entrySet()) {
             if (entry.getKey().equals(Issue.Field.STATUS)) {
                 if (entry.getValue().toLowerCase().equals("open")) {
-                    service.reopen(repositoryOwner, repository, Integer.valueOf(id));
-                } else if (entry.getValue().toLowerCase().equals("close")) {
+                    throw new DomainMethodNotImplementedException("reopen in ghapi does not work properly");
+                    //service.reopen(repositoryOwner, repository, Integer.valueOf(id));
+                } else if (entry.getValue().toLowerCase().equals("closed")) {
                     service.close(repositoryOwner, repository, Integer.valueOf(id));
                 }
             } else if (entry.getKey().equals(Issue.Field.DESCRIPTION)) {
                 Issue tmp = getIssue(id);
-                System.out.println(entry.getValue());
                 service.edit(repositoryOwner, repository, Integer.valueOf(id),
                         tmp.getSummary(), entry.getValue().toString());
             } else if (entry.getKey().equals(Issue.Field.SUMMARY)) {
                 Issue tmp = getIssue(id);
                 service.edit(repositoryOwner, repository, Integer.valueOf(id), entry.getValue(), tmp.getDescription());
             }
-        }*/
-
+        }
     }
     
     public Issue getIssue(String id) {
@@ -254,6 +252,24 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
         return i;
     }
 
+    public void addLabelToRepository(String text) {
+        ghapi.authenticate(githubUser, githubAuthToken);
+        Issues service = new Issues(ghapi);
+        service.add_label(repositoryOwner, repository, text, 0);
+    }
+
+    public void removeLabelFromRepository(String text) {
+
+    }
+
+    public void addLabelToIssue(String text) {
+
+    }
+
+    public void removeLabelFromIssue(String text) {
+
+    }
+    
     public AliveState getState() {
         return state;
     }

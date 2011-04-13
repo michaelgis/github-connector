@@ -76,30 +76,28 @@ public class GithubServiceUT {
         
     }
 
-    @Ignore
+    @Test
     public void testUpdateIssue() throws Exception {
-        githubClient.setGithubAuthToken("hallo123!");
-
         HashMap<IssueAttribute, String> changes = new HashMap<IssueAttribute, String>();
         changes.put(Issue.Field.STATUS, "closed");
         changes.put(Issue.Field.DESCRIPTION, "updated des");
         changes.put(Issue.Field.SUMMARY, "updated summary");
         
-        githubClient.updateIssue("2", "ChangeComment", changes);
+        githubClient.updateIssue("5", "ChangeComment", changes);
         
-        Issue tmp = githubClient.getIssue("2");
+        Issue tmp = githubClient.getIssue("5");
         assertThat(tmp.getDescription(), is("updated des"));
         assertThat(tmp.getSummary(), is("updated summary"));
         assertThat(tmp.getStatus(), is(Status.CLOSED));
         
         changes.clear();
-        changes.put(Issue.Field.STATUS, "open");
-        changes.put(Issue.Field.DESCRIPTION, "1");
-        changes.put(Issue.Field.SUMMARY, "TestIssue02");
-        githubClient.updateIssue("2", "ChangeComment", changes);
+        //changes.put(Issue.Field.STATUS, "open");
+        changes.put(Issue.Field.DESCRIPTION, "commentbla");
+        changes.put(Issue.Field.SUMMARY, "bla");
+        githubClient.updateIssue("5", "ChangeComment", changes);
         
     }
-    @Ignore
+    @Test
     public void testUpdateIssueWithIncorrectLogin_shouldFail() throws Exception {
         githubClient.setGithubAuthToken("wrongPWD");
         
@@ -108,12 +106,12 @@ public class GithubServiceUT {
         changes.put(Issue.Field.DESCRIPTION, "updated des");
         changes.put(Issue.Field.SUMMARY, "updated summary");
         
-        githubClient.updateIssue("2", "ChangeComment", changes);
+        githubClient.updateIssue("5", "ChangeComment", changes);
         
-        Issue tmp = githubClient.getIssue("2");
-        assertThat(tmp.getDescription(), is("1"));
-        assertThat(tmp.getSummary(), is("TestIssue02"));
-        assertThat(tmp.getStatus(), is(Status.NEW));
+        Issue tmp = githubClient.getIssue("5");
+        assertThat(tmp.getDescription(), is("commentbla"));
+        assertThat(tmp.getSummary(), is("bla"));
+        //assertThat(tmp.getStatus(), is(Status.NEW));
     }
     
 
