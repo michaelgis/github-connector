@@ -48,7 +48,7 @@ public class GithubServiceInstanceFactoryTest {
         attributes.put("github.repositoryOwner", "testOwner");
         GithubService githubService = new GithubService("id", "repo", "OldOwner");
         ghif.updateServiceInstance(githubService, attributes);
-        assertThat(githubService.getGithubAuthToken(), is("pwd"));
+        assertThat(githubService.getGithubPassword(), is("pwd"));
         assertThat(githubService.getGithubUser(), is("user"));
         assertThat(githubService.getRepository(), is("testRepo"));
         assertThat(githubService.getRepositoryOwner(), is("testOwner"));

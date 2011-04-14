@@ -41,7 +41,7 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
 
     private AliveState state = AliveState.DISCONNECTED;
     private String githubUser;
-    private String githubAuthToken;
+    private String githubPassword;
     private String repository;
     private String repositoryOwner;
 
@@ -60,7 +60,7 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
 
     @Override
     public void addComment(String issueNumber, String commentString) {
-        ghapi.authenticate(githubUser, githubAuthToken);
+        ghapi.authenticate(githubUser, githubPassword);
         Issues service = new Issues(ghapi);
         service.add_comment(repositoryOwner, repository, Integer.valueOf(issueNumber), commentString);        
     }
@@ -103,7 +103,6 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
         String temp = service.list(repositoryOwner, repository, "open").resp;
         Vector<GithubIssue> listOfIssues = processIssueResponse(temp);
         return listOfIssues;
-
     }
 
     private Vector<GithubIssue> processIssueResponse(String temp) {
@@ -180,7 +179,7 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
 
     @Override
     public String createIssue(Issue engsbIssue) {
-        ghapi.authenticate(githubUser, githubAuthToken);
+        ghapi.authenticate(githubUser, githubPassword);
         Issues service = new Issues(ghapi);
         String tmp = service.open(repositoryOwner, repository, engsbIssue.getSummary(),
                 engsbIssue.getDescription()).resp;
@@ -207,7 +206,7 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
 
     @Override
     public void updateIssue(String id, String comment, HashMap<IssueAttribute, String> changes) {
-        ghapi.authenticate(githubUser, githubAuthToken);
+        ghapi.authenticate(githubUser, githubPassword);
         Issues service = new Issues(ghapi);
         if (comment != null && !comment.equals("")) {
             addComment(id, comment);
@@ -232,16 +231,20 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
         }
     }
     
-    public Issue getIssue(String id) {
+    public GithubIssue getGithubIssue(String id) {
         Issues service = new Issues(ghapi);
         String tmp = service.issue(repositoryOwner, repository, Integer.valueOf(id)).resp;
-        return convertGithubIssue(id, processSingleIssueResponse(tmp));
+        return processSingleIssueResponse(tmp);
+    }
+    
+    public Issue getIssue(String id) {
+        return convertGithubIssue(getGithubIssue(id));
     }
 
-    private Issue convertGithubIssue(String id, GithubIssue issue) {
+    private Issue convertGithubIssue(GithubIssue issue) {
         Issue i = new Issue();
         i.setDescription(issue.getBody());
-        i.setId(id);
+        i.setId(String.valueOf(issue.getNumber()));
         i.setOwner(issue.getUser());
         if (issue.getState().toLowerCase().equals("open")) {
             i.setStatus(Status.NEW);
@@ -253,21 +256,34 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
     }
 
     public void addLabelToRepository(String text) {
-        ghapi.authenticate(githubUser, githubAuthToken);
-        Issues service = new Issues(ghapi);
-        service.add_label(repositoryOwner, repository, text, 0);
+      //Not available in ghapi
+        throw new DomainMethodNotImplementedException("method not yet implemented");
     }
 
     public void removeLabelFromRepository(String text) {
-
+      //Not available in ghapi
+        throw new DomainMethodNotImplementedException("method not yet implemented");
     }
 
-    public void addLabelToIssue(String text) {
-
+    public void addLabelToIssue(String text, int issueId) throws Exception {
+       
+        ghapi.authenticate(githubUser, githubPassword);
+        Issues service = new Issues(ghapi);
+        String tmp = service.add_label_to_Issue(repositoryOwner, repository, text, issueId).resp;
+        if (tmp == null || tmp.equals("{\"error\":\"not authorized\"}")) {
+            log.error("Not Authorized Access!");
+            throw new Exception("User not authorized!");
+        }
     }
 
-    public void removeLabelFromIssue(String text) {
-
+    public void removeLabelFromIssue(String text, int issueId) throws Exception {
+        ghapi.authenticate(githubUser, githubPassword);
+        Issues service = new Issues(ghapi);
+        String tmp = service.remove_label_from_Issue(repositoryOwner, repository, text, issueId).resp;
+        if (tmp == null || tmp.equals("{\"error\":\"not authorized\"}")) {
+            log.error("Not Authorized Access!");
+            throw new Exception("User not authorized!");
+        }
     }
     
     public AliveState getState() {
@@ -286,12 +302,12 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
         this.githubUser = githubUser;
     }
 
-    public String getGithubAuthToken() {
-        return githubAuthToken;
+    public String getGithubPassword() {
+        return githubPassword;
     }
 
-    public void setGithubAuthToken(String githubAuthToken) {
-        this.githubAuthToken = githubAuthToken;
+    public void setGithubPassword(String githubPassword) {
+        this.githubPassword = githubPassword;
     }
 
     public String getRepository() {

@@ -35,8 +35,8 @@ public class GithubServiceInstanceFactory implements ServiceInstanceFactory<Issu
 
         builder.attribute(builder.newAttribute().id("github.user").name("github.user.name")
                 .description("github.user.description").build());
-        builder.attribute(builder.newAttribute().id("github.authToken").name("github.authToken.name")
-                .description("github.authToken.description").defaultValue("").asPassword().build());
+        builder.attribute(builder.newAttribute().id("github.password").name("github.password.name")
+                .description("github.password.description").defaultValue("").asPassword().build());
         builder.attribute(builder.newAttribute().id("github.repository").name("github.repository.name")
                 .description("github.repository.description").defaultValue("").required().build());
         builder.attribute(builder.newAttribute().id("github.repositoryOwner").name("github.repositoryOwner.name")
@@ -48,7 +48,7 @@ public class GithubServiceInstanceFactory implements ServiceInstanceFactory<Issu
     @Override
     public void updateServiceInstance(GithubService instance, Map<String, String> attributes) {
         instance.setGithubUser(attributes.get("github.user"));
-        instance.setGithubAuthToken(attributes.get("github.password"));
+        instance.setGithubPassword(attributes.get("github.password"));
 
         instance.setRepository(attributes.get("github.repository"));
         instance.setRepositoryOwner(attributes.get("github.repositoryOwner"));
@@ -64,7 +64,7 @@ public class GithubServiceInstanceFactory implements ServiceInstanceFactory<Issu
         GithubService githubConnector = new GithubService(id, attributes.get("github.repository"),
                 attributes.get("github.repositoryOwner"));
         githubConnector.setGithubUser(attributes.get("github.user"));
-        githubConnector.setGithubAuthToken(attributes.get("github.authToken"));
+        githubConnector.setGithubPassword(attributes.get("github.password"));
         updateServiceInstance(githubConnector, attributes);
         return githubConnector;
     }

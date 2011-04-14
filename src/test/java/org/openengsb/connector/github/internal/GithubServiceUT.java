@@ -22,9 +22,9 @@ import static org.hamcrest.core.Is.is;
 
 import java.rmi.RemoteException;
 import java.util.HashMap;
+import java.util.Vector;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openengsb.domain.issue.models.Issue;
 import org.openengsb.domain.issue.models.Issue.Status;
@@ -39,13 +39,13 @@ public class GithubServiceUT {
     @Before
     public void setUp() throws Exception {
         githubClient = new GithubService("id", repository, repositoryOwner);
-        githubClient.setGithubAuthToken("ENTER_YOUR_PWD_HERER_TO_RUN_TEST");
+        githubClient.setGithubPassword("ENTER_YOUR_PWD_HERER_TO_RUN_TEST");
         githubClient.setGithubUser("ENTER_YOUR_ID_HERER_TO_RUN_TEST");
     }
-    
+
     @Test
     public void testCreateIssueAndLoginWithWrongUserdata_shouldFail() throws RemoteException {
-        githubClient.setGithubAuthToken("wrongPWD");
+        githubClient.setGithubPassword("wrongPWD");
         Issue issue = createIssue("id1");
         int oldNumber = githubClient.getIssues().size();
         githubClient.createIssue(issue);
@@ -62,7 +62,7 @@ public class GithubServiceUT {
 
     @Test
     public void testAddCommentWithIncorrectLogin_shouldFail() throws Exception {
-        githubClient.setGithubAuthToken("wrongPWD");
+        githubClient.setGithubPassword("wrongPWD");
         int oldNumber = githubClient.getComments(1).size();
         githubClient.addComment("1", "TestComment");
         assertThat(githubClient.getComments(1).size(), is(oldNumber));
@@ -99,7 +99,7 @@ public class GithubServiceUT {
     }
     @Test
     public void testUpdateIssueWithIncorrectLogin_shouldFail() throws Exception {
-        githubClient.setGithubAuthToken("wrongPWD");
+        githubClient.setGithubPassword("wrongPWD");
         
         HashMap<IssueAttribute, String> changes = new HashMap<IssueAttribute, String>();
         changes.put(Issue.Field.STATUS, "closed");
@@ -113,9 +113,7 @@ public class GithubServiceUT {
         assertThat(tmp.getSummary(), is("bla"));
         //assertThat(tmp.getStatus(), is(Status.NEW));
     }
-    
-
-    
+   
     @Test
     public void testGetIssue() throws Exception {
         githubClient.getIssues();
@@ -124,7 +122,19 @@ public class GithubServiceUT {
         assertThat(i.getSummary(), is("TestIssue03"));
         assertThat(i.getId(), is("3"));
         assertThat(i.getStatus(), is(Status.NEW));
+    }
+    
+    @Test
+    public void testAddAndRemoveLabelToIssue() throws Exception {
+        Vector<String> labelsBefore = githubClient.getGithubIssue("3").getLabels();
+        githubClient.addLabelToIssue("plsLabel", 3);
+        Vector<String> labels = githubClient.getGithubIssue("3").getLabels();
+        assertThat(labels.size(), is(labelsBefore.size() + 1));
+        assertThat(labels.lastElement(), is("plsLabel"));
         
+        githubClient.removeLabelFromIssue("plsLabel", 3);
+        Vector<String> labelsAfter = githubClient.getGithubIssue("3").getLabels();
+        assertThat(labelsAfter.size(), is(labelsBefore.size()));
     }
     
 /*
