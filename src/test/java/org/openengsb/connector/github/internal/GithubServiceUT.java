@@ -33,16 +33,16 @@ import org.openengsb.domain.issue.models.IssueAttribute;
 public class GithubServiceUT {
 
     private GithubService githubClient;
-    private String repository = "testRepo";
-    private String repositoryOwner = "e0828244";
+    private String repository = "ENTER_YOUR_TESTREPO_HERER_TO_RUN_TEST";
+    private String repositoryOwner = "ENTER_YOUR_TESTOWNER_HERER_TO_RUN_TEST";
 
     @Before
     public void setUp() throws Exception {
         githubClient = new GithubService("id");
         githubClient.setRepository(repository);
         githubClient.setRepositoryOwner(repositoryOwner);
-        githubClient.setGithubPassword("baba123!");
-        githubClient.setGithubUser("e0828244");
+        githubClient.setGithubPassword("ENTER_YOUR_PWD_HERER_TO_RUN_TEST");
+        githubClient.setGithubUser("ENTER_YOUR_ID_HERER_TO_RUN_TEST");
     }
 
     @Test
@@ -84,6 +84,7 @@ public class GithubServiceUT {
         changes.put(Issue.Field.STATUS, "closed");
         changes.put(Issue.Field.DESCRIPTION, "updated des");
         changes.put(Issue.Field.SUMMARY, "updated summary");
+        changes.put(Issue.Field.COMPONENT, "1,2");
         
         githubClient.updateIssue("5", "ChangeComment", changes);
         
@@ -91,11 +92,20 @@ public class GithubServiceUT {
         assertThat(tmp.getDescription(), is("updated des"));
         assertThat(tmp.getSummary(), is("updated summary"));
         assertThat(tmp.getStatus(), is(Status.CLOSED));
-        
+
+        int k = 0;
+        for (String i : tmp.getComponents()) {
+            if (i.equals("1") || i.equals("2") || i.equals("plsLabel")) {
+                k++;
+            }
+        }
+        assertThat(k, is(2));
+
         changes.clear();
         //changes.put(Issue.Field.STATUS, "open");
         changes.put(Issue.Field.DESCRIPTION, "commentbla");
         changes.put(Issue.Field.SUMMARY, "bla");
+        changes.put(Issue.Field.COMPONENT, "plsLabel");
         githubClient.updateIssue("5", "ChangeComment", changes);
         
     }
@@ -138,6 +148,17 @@ public class GithubServiceUT {
         Vector<String> labelsAfter = githubClient.getGithubIssue("3").getLabels();
         assertThat(labelsAfter.size(), is(labelsBefore.size()));
     }
+    
+    @Test
+    public void testAddAndRemoveComponent() throws Exception {
+        int oldSize = githubClient.getLabels().size();
+        githubClient.addComponent("TestComponent");
+        assertThat(githubClient.getLabels().size(), is(oldSize + 1));
+        githubClient.removeComponent("TestComponent");
+        assertThat(githubClient.getLabels().size(), is(oldSize));
+    }
+    
+    
     
     private Issue createIssue(String id) {
         Issue issue = new Issue();

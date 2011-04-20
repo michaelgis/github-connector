@@ -19,6 +19,7 @@ package org.openengsb.connector.github.internal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -113,7 +114,7 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
         return listOfIssues;
     }
     
-    private GithubIssue processSingleIssueResponse(String temp) {        
+    private GithubIssue processSingleIssueResponse(String temp) {
         String tmp = temp.substring(temp.indexOf("{\"gravatar_id\":\"") + "{\"gravatar_id\":\"".length(),
                 temp.lastIndexOf("\"}"));
 
@@ -144,6 +145,14 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
         tmp = tmp.substring(index + "\",\"updated_at\":\"".length());
         index = tmp.indexOf("\",\"");
         c.setUpdatedAt(tmp.substring(0, index));
+        
+        int tempIndex = temp.indexOf("\",\"closed_at\":\"");
+        if (tempIndex > -1) {
+            tmp = tmp.substring(index + "\",\"closed_at\":\"".length());
+            index = tmp.indexOf("\",\"");
+            c.setClosedAt(tmp.substring(0, index));
+        }
+        
         tmp = tmp.substring(index + "\",\"html_url\":\"".length());
         index = tmp.indexOf("\",\"");
         c.setHtmlUrl(tmp.substring(0, index));
@@ -167,6 +176,18 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
         c.setState(tmp);
 
         return c;
+    }
+    
+    private List<String> processLabels(String labels) {
+        List<String> labelList = new ArrayList<String>();
+        
+        labels = labels.substring(labels.indexOf(":[\"") + ":[\"".length(), labels.length() - 4);
+        String[] tmp = labels.split("\",\"");
+        for (String temp : tmp) {
+            labelList.add(temp);
+        }
+        
+        return labelList;
     }
 
     @Override
@@ -224,21 +245,52 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
                         tmp.getSummary(), entry.getValue().toString());
             } else if (entry.getKey().equals(Issue.Field.SUMMARY)) {
                 Issue tmp = getIssue(id);
-                service.edit(repositoryOwner, repository, Integer.valueOf(id), entry.getValue(), tmp.getDescription());
+                service.edit(repositoryOwner, repository, Integer.valueOf(id), entry.getValue(),
+                        tmp.getDescription());
+            } else if (entry.getKey().equals(Issue.Field.COMPONENT)) {
+                Issue tmp = getIssue(id);
+                
+                for (String i : tmp.getComponents()) {
+                    try {
+                        removeLabelFromIssue(i, Integer.valueOf(id));
+                    } catch (NumberFormatException e) {
+                        log.error(e);
+                    } catch (Exception e) {
+                        log.error(e);
+                    }
+                }
+                
+                for (String i : entry.getValue().split(",")) {
+                    try {
+                        addLabelToIssue(i, Integer.valueOf(id));
+                    } catch (NumberFormatException e) {
+                        log.error(e);
+                    } catch (Exception e) {
+                        log.error(e);
+                    }
+                }
             }
         }
     }
     
     @Override
-    public void addComponent(String arg0) {
-        // TODO Auto-generated method stub
+    public void addComponent(String component) {
+        ghapi.authenticate(githubUser, githubPassword);
+        Issues service = new Issues(ghapi);
         
+        service.add_label(repositoryOwner, repository, component);
     }
 
     @Override
-    public void removeComponent(String arg0) {
-        // TODO Auto-generated method stub
-        
+    public void removeComponent(String component) {
+        ghapi.authenticate(githubUser, githubPassword);
+        Issues service = new Issues(ghapi);
+        service.remove_label(repositoryOwner, repository, component);
+    }
+    
+    public List<String> getLabels() {
+        Issues service = new Issues(ghapi);
+        return processLabels(service.labels(repositoryOwner, repository).resp);
     }
     
     public GithubIssue getGithubIssue(String id) {
@@ -262,17 +314,8 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
             i.setStatus(Status.CLOSED);
         }
         i.setSummary(issue.getTitle());
+        i.setComponents(issue.getLabels());
         return i;
-    }
-
-    public void addLabelToRepository(String text) {
-      //Not available in ghapi
-        throw new DomainMethodNotImplementedException("method not yet implemented");
-    }
-
-    public void removeLabelFromRepository(String text) {
-      //Not available in ghapi
-        throw new DomainMethodNotImplementedException("method not yet implemented");
     }
 
     public void addLabelToIssue(String text, int issueId) throws Exception {

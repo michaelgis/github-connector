@@ -33,7 +33,14 @@ public class GithubIssue {
     private String user;
     private Vector<String> labels = new Vector<String>();
     private String state;
+    private String closedAt;
     
+    public String getClosedAt() {
+        return closedAt;
+    }
+    public void setClosedAt(String closedAt) {
+        this.closedAt = closedAt;
+    }
     public String getGravatarId() {
         return gravatarId;
     }
