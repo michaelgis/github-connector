@@ -47,10 +47,8 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
 
     private GitHubAPI ghapi = new GitHubAPI();
     
-    public GithubService(String id, String repository, String repositoryOwner) {
+    public GithubService(String id) {
         super(id);
-        this.repository = repository;
-        this.repositoryOwner = repositoryOwner;
     }
 
     @Override
@@ -229,6 +227,18 @@ public class GithubService extends AbstractOpenEngSBService implements IssueDoma
                 service.edit(repositoryOwner, repository, Integer.valueOf(id), entry.getValue(), tmp.getDescription());
             }
         }
+    }
+    
+    @Override
+    public void addComponent(String arg0) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void removeComponent(String arg0) {
+        // TODO Auto-generated method stub
+        
     }
     
     public GithubIssue getGithubIssue(String id) {

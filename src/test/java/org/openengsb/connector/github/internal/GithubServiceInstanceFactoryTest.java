@@ -34,7 +34,8 @@ public class GithubServiceInstanceFactoryTest {
     public void testUpdateServiceInstance() throws Exception {
         GithubServiceInstanceFactory ghif = new GithubServiceInstanceFactory();
         Map<String, String> attributes = new HashMap<String, String>();
-        GithubService service = ghif.createServiceInstance("id", attributes);
+        GithubService service = (GithubService) ghif.createNewInstance("id");
+        ghif.applyAttributes(service, attributes);
         assertThat(service.getInstanceId(), is("id"));
     }
 
@@ -46,8 +47,10 @@ public class GithubServiceInstanceFactoryTest {
         attributes.put("github.password", "pwd");
         attributes.put("github.repository", "testRepo");
         attributes.put("github.repositoryOwner", "testOwner");
-        GithubService githubService = new GithubService("id", "repo", "OldOwner");
-        ghif.updateServiceInstance(githubService, attributes);
+        
+        GithubService githubService = new GithubService("id"); 
+        ghif.applyAttributes(githubService, attributes); 
+
         assertThat(githubService.getGithubPassword(), is("pwd"));
         assertThat(githubService.getGithubUser(), is("user"));
         assertThat(githubService.getRepository(), is("testRepo"));

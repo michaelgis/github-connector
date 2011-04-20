@@ -33,14 +33,16 @@ import org.openengsb.domain.issue.models.IssueAttribute;
 public class GithubServiceUT {
 
     private GithubService githubClient;
-    private String repository = "ENTER_YOUR_TESTREPO_HERER_TO_RUN_TEST";
-    private String repositoryOwner = "ENTER_YOUR_TESTOWNER_HERER_TO_RUN_TEST";
+    private String repository = "testRepo";
+    private String repositoryOwner = "e0828244";
 
     @Before
     public void setUp() throws Exception {
-        githubClient = new GithubService("id", repository, repositoryOwner);
-        githubClient.setGithubPassword("ENTER_YOUR_PWD_HERER_TO_RUN_TEST");
-        githubClient.setGithubUser("ENTER_YOUR_ID_HERER_TO_RUN_TEST");
+        githubClient = new GithubService("id");
+        githubClient.setRepository(repository);
+        githubClient.setRepositoryOwner(repositoryOwner);
+        githubClient.setGithubPassword("baba123!");
+        githubClient.setGithubUser("e0828244");
     }
 
     @Test
@@ -137,106 +139,6 @@ public class GithubServiceUT {
         assertThat(labelsAfter.size(), is(labelsBefore.size()));
     }
     
-/*
-   @Test
-    public void testUpdateIssue_shouldSuccess() throws Exception {
-
-        RemoteIssue remoteIssue = mock(RemoteIssue.class);
-        when(remoteIssue.getKey()).thenReturn("issueKey");
-        when(jiraSoapService.getIssue(authToken, "id1")).thenReturn(remoteIssue);
-        HashMap<IssueAttribute, String> changes = new HashMap<IssueAttribute, String>();
-
-        jiraClient.updateIssue("id1", "comment1", changes);
-        verify(jiraSoapService, times(1)).updateIssue(anyString(), anyString(), any(RemoteFieldValue[].class));
-
-    }
-
-    @Test
-    public void testMoveIssues() throws Exception {
-        RemoteVersion[] versions = new RemoteVersion[1];
-        RemoteVersion version = mock(RemoteVersion.class);
-        when(version.getId()).thenReturn("id2");
-        versions[0] = version;
-        when(jiraSoapService.getVersions(anyString(), anyString())).thenReturn(versions);
-        RemoteIssue[] values = new RemoteIssue[1];
-        RemoteIssue issue = mock(RemoteIssue.class);
-        values[0] = issue;
-        when(jiraSoapService.getIssuesFromJqlSearch(authToken, "fixVersion in (\"id1\") ", 1000)).thenReturn(values);
-        jiraClient.moveIssuesFromReleaseToRelease("id1", "id2");
-        verify(jiraSoapService, atLeastOnce()).updateIssue(anyString(), anyString(), any(RemoteFieldValue[].class));
-    }
-
-    @Test
-    public void testCloseRelease() throws java.rmi.RemoteException {
-        RemoteVersion[] versions = new RemoteVersion[1];
-        RemoteVersion version = mock(RemoteVersion.class);
-        when(version.getName()).thenReturn("versionName");
-        versions[0] = version;
-        when(jiraSoapService.getVersions(anyString(), anyString())).thenReturn(versions);
-
-        jiraClient.closeRelease("versionName");
-        verify(jiraSoapService).releaseVersion(authToken, "projectKey", version);
-    }
-
-    @Test
-    public void testGenerateReleaseReport() throws java.rmi.RemoteException {
-        RemoteIssue[] values = new RemoteIssue[2];
-        RemoteIssue issue = mock(RemoteIssue.class);
-        when(issue.getKey()).thenReturn("issue1Key");
-        when(issue.getDescription()).thenReturn("issue1Description");
-        when(issue.getType()).thenReturn("1");
-        when(issue.getStatus()).thenReturn("6");
-        values[0] = issue;
-        RemoteIssue issue2 = mock(RemoteIssue.class);
-        when(issue2.getKey()).thenReturn("issue2Key");
-        when(issue2.getDescription()).thenReturn("issue2Description");
-        when(issue2.getType()).thenReturn("2");
-        when(issue2.getStatus()).thenReturn("6");
-        values[1] = issue2;
-
-        when(jiraSoapService.getIssuesFromJqlSearch(authToken, "fixVersion in (\"versionName\") and status in (6)",
-                1000)).thenReturn(values);
-        ArrayList<String> report = jiraClient.generateReleaseReport("versionName");
-        ArrayList<String> expectedReport = new ArrayList<String>();
-
-        expectedReport.add("** New Feature\n");
-        expectedReport.add("\t * [issue2Key] - issue2Description");
-        expectedReport.add("\n");
-        expectedReport.add("** Bug\n");
-        expectedReport.add("\t * [issue1Key] - issue1Description");
-        expectedReport.add("\n");
-        assertThat(report.toString(), is(expectedReport.toString()));
-    }
-
-    @Test(expected = DomainMethodExecutionException.class)
-    public void testFailCommitingIssueCausedByRemoteException_shouldThrowDomainMehtodExecutionException()
-        throws Exception {
-        RemoteIssue remoteIssue = mock(RemoteIssue.class);
-        when(remoteIssue.getKey()).thenReturn("issueKey");
-        doThrow(new RemoteException()).when(jiraSoapSession).connect(anyString(), anyString());
-        jiraClient.addComment("id", "comment1");
-    }
-
-    @Test(expected = DomainMethodExecutionException.class)
-    public void testFailUpdateIssueCausedByRemoteException_shouldThrowDomainMehtodExecutionException()
-        throws Exception {
-        RemoteIssue remoteIssue = mock(RemoteIssue.class);
-        doThrow(new RemoteException()).when(jiraSoapService).updateIssue(anyString(), anyString(),
-            any(RemoteFieldValue[].class));
-        when(jiraSoapService.getIssue(authToken, "id1")).thenReturn(remoteIssue);
-        HashMap<IssueAttribute, String> changes = new HashMap<IssueAttribute, String>();
-        jiraClient.updateIssue("id1", "comment1", changes);
-    }
-
-    @Test(expected = DomainMethodExecutionException.class)
-    public void tesGeneratingReleaseReportCausedByNonExistingRelease_shouldThrowDomainMehtodExecutionException()
-        throws Exception {
-        doThrow(new RemoteException()).when(jiraSoapService).getIssuesFromJqlSearch(authToken,
-            "fixVersion in (\"versionName\") and status in (6)",
-                1000);
-        jiraClient.generateReleaseReport("versionName");
-    }*/
-
     private Issue createIssue(String id) {
         Issue issue = new Issue();
         issue.setId(id);

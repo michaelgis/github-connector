@@ -17,61 +17,26 @@
 
 package org.openengsb.connector.github.internal;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import org.openengsb.core.api.ServiceInstanceFactory;
-import org.openengsb.core.api.descriptor.ServiceDescriptor;
-import org.openengsb.core.api.descriptor.ServiceDescriptor.Builder;
-import org.openengsb.core.api.validation.MultipleAttributeValidationResult;
-import org.openengsb.core.api.validation.MultipleAttributeValidationResultImpl;
-import org.openengsb.domain.issue.IssueDomain;
+import org.openengsb.core.api.Domain;
+import org.openengsb.core.common.AbstractConnectorInstanceFactory;
 
-public class GithubServiceInstanceFactory implements ServiceInstanceFactory<IssueDomain, GithubService> {
+public class GithubServiceInstanceFactory extends AbstractConnectorInstanceFactory<GithubService> {
 
     @Override
-    public ServiceDescriptor getDescriptor(Builder builder) {
-        builder.name("service.name").description("service.description");
-
-        builder.attribute(builder.newAttribute().id("github.user").name("github.user.name")
-                .description("github.user.description").build());
-        builder.attribute(builder.newAttribute().id("github.password").name("github.password.name")
-                .description("github.password.description").defaultValue("").asPassword().build());
-        builder.attribute(builder.newAttribute().id("github.repository").name("github.repository.name")
-                .description("github.repository.description").defaultValue("").required().build());
-        builder.attribute(builder.newAttribute().id("github.repositoryOwner").name("github.repositoryOwner.name")
-                .description("github.repositoryOwner.description").defaultValue("").required().build());
-
-        return builder.build();
+    public Domain createNewInstance(String id) {
+        return new GithubService(id);
     }
 
     @Override
-    public void updateServiceInstance(GithubService instance, Map<String, String> attributes) {
+    public void doApplyAttributes(GithubService instance, Map<String, String> attributes) {
         instance.setGithubUser(attributes.get("github.user"));
         instance.setGithubPassword(attributes.get("github.password"));
 
         instance.setRepository(attributes.get("github.repository"));
         instance.setRepositoryOwner(attributes.get("github.repositoryOwner"));
-    }
-
-    @Override
-    public MultipleAttributeValidationResult updateValidation(GithubService instance, Map<String, String> attributes) {
-        return new MultipleAttributeValidationResultImpl(true, new HashMap<String, String>());
-    }
-
-    @Override
-    public GithubService createServiceInstance(String id, Map<String, String> attributes) {
-        GithubService githubConnector = new GithubService(id, attributes.get("github.repository"),
-                attributes.get("github.repositoryOwner"));
-        githubConnector.setGithubUser(attributes.get("github.user"));
-        githubConnector.setGithubPassword(attributes.get("github.password"));
-        updateServiceInstance(githubConnector, attributes);
-        return githubConnector;
-    }
-
-    @Override
-    public MultipleAttributeValidationResult createValidation(String id, Map<String, String> attributes) {
-        return new MultipleAttributeValidationResultImpl(true, new HashMap<String, String>());
+        
     }
 
 }
